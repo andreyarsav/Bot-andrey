@@ -1,1 +1,28 @@
 
+import telebot
+import requests
+import os
+
+TOKEN = '8767587794:AAG2dSMP6adwGFqTa7Q8mWhg5Nk0j28xY5U'
+bot = telebot.TeleBot(TOKEN)
+PENCIPTA = "Andrey Arsavin"
+
+def get_ai_response(text):
+    pertanyaan = text.lower()
+    if any(k in pertanyaan for k in ["siapa yang buat", "pencipta", "siapa buat"]):
+        return f"Aku dibuat oleh sang master, {PENCIPTA}! Dia orangnya keren banget."
+    
+    try:
+        url = f"https://api.simsimi.net{text}&lc=id"
+        response = requests.get(url, timeout=5)
+        return response.json()['success']
+    except:
+        return "Maaf Andrey, server AI lagi penuh. Coba tanya lagi ya!"
+
+@bot.message_handler(func=lambda m: True)
+def chat(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    bot.reply_to(message, get_ai_response(message.text))
+
+if __name__ == "__main__":
+    bot.infinity_polling()
